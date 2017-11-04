@@ -1,0 +1,5 @@
+Tray on Start: true
+Keybind: SHIFT+ALT+4
+Exit on Close: true
+Start on Startup: true
+Sound: true
