@@ -1,4 +1,4 @@
-Tray on Start: true
+Tray on Start: false
 Keybind: SHIFT+ALT+4
 Exit on Close: true
 Start on Startup: true

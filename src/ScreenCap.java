@@ -1,4 +1,5 @@
 
+import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -28,6 +29,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.keyboard.NativeKeyEvent;
 import org.jnativehook.keyboard.NativeKeyListener;
@@ -44,7 +46,7 @@ public class ScreenCap extends JFrame implements ActionListener {
     public static void main(String[] args) throws Exception {
         Settings.os = new Scanner(System.getProperty("os.name")).next().toLowerCase();
         GlobalScreen.registerNativeHook();
-        
+
         new ScreenCap();
     }
 
@@ -58,8 +60,10 @@ public class ScreenCap extends JFrame implements ActionListener {
     MenuItem openItem;
     TrayIcon icon;
 
-    public ScreenCap() throws Exception {
+    public ScreenCap() throws Exception {      
         Settings.InstalledPath = getClass().getProtectionDomain().getCodeSource().getLocation().toString().substring(6);
+        Settings.InstalledPath = Settings.InstalledPath.substring(0, Settings.InstalledPath.length()-1);
+        Settings.InstalledPath = Settings.InstalledPath.substring(0, Settings.InstalledPath.lastIndexOf("/"));
         
         Logger.getLogger(GlobalScreen.class.getPackage().getName()).setLevel(Level.OFF);
         if (Settings.os.equals("windows")) {
@@ -73,6 +77,7 @@ public class ScreenCap extends JFrame implements ActionListener {
         } else {
             OpenMenu();
         }
+
     }
 
     public void OpenTray() {
@@ -130,23 +135,32 @@ public class ScreenCap extends JFrame implements ActionListener {
 
     public void OpenMenu() {
         setResizable(false);
-        setTitle("Screencapper");
+        setTitle("Screencap");
         setVisible(true);
-        setSize(250, 115);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
-        FlowLayout lm = new FlowLayout();
-        lm.setAlignment(FlowLayout.LEFT);
+        FlowLayout fl = new FlowLayout();
+        fl.setAlignment(FlowLayout.LEFT);
+        
+        JPanel top = new JPanel(fl);
+        JPanel mid = new JPanel(fl);
+        JPanel bot = new JPanel(fl);
+                
+        BorderLayout lm = new BorderLayout();
         setLayout(lm);
+        
+        add(top, BorderLayout.NORTH);
+        add(mid, BorderLayout.CENTER);
+        add(bot, BorderLayout.SOUTH);
 
         open = new JButton("Open settings location");
         open.setVisible(true);
         open.setEnabled(Desktop.isDesktopSupported());
-        
+
         website = new JButton("Website");
         website.setVisible(true);
         website.setEnabled(Desktop.isDesktopSupported());
-        
+
         tray = new JCheckBox();
         tray.setText("Send to tray on startup");
         tray.setEnabled(SystemTray.isSupported());
@@ -162,18 +176,18 @@ public class ScreenCap extends JFrame implements ActionListener {
         startup.setText("Start application on login");
         startup.setEnabled(Settings.os.equals("windows"));
         startup.setSelected(Settings.Startup);
-        
+
         sound = new JCheckBox();
         sound.setText("Sound");
         sound.setEnabled(true);
         sound.setSelected(Settings.Sound);
-        
-        add(open);
-        add(website);
-        add(tray);
-        add(exit);
-        add(startup);
-        add(sound);
+
+        top.add(open);
+        top.add(website);
+        mid.add(tray);
+        mid.add(exit);
+        bot.add(startup);
+        bot.add(sound);
 
         website.addActionListener(this);
         open.addActionListener(this);
@@ -181,19 +195,18 @@ public class ScreenCap extends JFrame implements ActionListener {
         exit.addActionListener(this);
         startup.addActionListener(this);
         sound.addActionListener(this);
-        
-        
-        addWindowListener(new WindowAdapter(){
-           @Override
-           public void windowClosing(WindowEvent et) {
-               System.out.println("closing");
-               
-               if(!Settings.ExitClose)
-                   OpenTray();
-           }
+
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent et) {
+                System.out.println("closing");
+
+                if (!Settings.ExitClose) {
+                    OpenTray();
+                }
+            }
         });
-        
-        
+
         GlobalScreen.addNativeKeyListener(new NativeKeyListener() {
             @Override
             public void nativeKeyPressed(NativeKeyEvent e) {
@@ -228,6 +241,7 @@ public class ScreenCap extends JFrame implements ActionListener {
         });
         setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/images/icon.gif")));
 
+        pack();
     }
 
     public void StartCapture(int x, int y) {
@@ -253,8 +267,8 @@ public class ScreenCap extends JFrame implements ActionListener {
         });
 
         GlobalScreen.addNativeMouseListener(new NativeMouseListener() {
-            
-                @Override
+
+            @Override
             public void nativeMouseReleased(NativeMouseEvent e) {
                 cap.setVisible(false);
                 GlobalScreen.removeNativeMouseListener(this);
@@ -294,13 +308,11 @@ public class ScreenCap extends JFrame implements ActionListener {
             }
         }
     }
-    
-    public void UploadImage(){
-        
-        
-        
+
+    public void UploadImage() {
+
     }
-    
+
     public void SetExitOnClose(JCheckBox b) {
         setDefaultCloseOperation(b.isSelected() ? JFrame.EXIT_ON_CLOSE : JFrame.HIDE_ON_CLOSE);
     }
@@ -330,19 +342,19 @@ public class ScreenCap extends JFrame implements ActionListener {
             SetExitOnClose(exit);
             Settings.Change(2, "" + exit.isSelected());
         }
-        
-        if(source == sound){
-            Settings.Change(4, ""+ sound.isSelected());
+
+        if (source == sound) {
+            Settings.Change(4, "" + sound.isSelected());
         }
-        if(source == website){
+        if (source == website) {
             if (Desktop.isDesktopSupported()) {
-                try{
+                try {
                     Desktop.getDesktop().browse(new URI("http://www.solidstudios.us/"));
-                }catch(Exception ex){
+                } catch (Exception ex) {
                     Settings.Log(ex.toString() + "  cannot open web browser");
                 }
             }
-   
+
         }
         if (source == startup) {
             Settings.Change(3, "" + startup.isSelected());
@@ -388,11 +400,11 @@ public class ScreenCap extends JFrame implements ActionListener {
             try {
                 String path = System.getProperty("user.home").replaceAll("\\\\", "/") + "/AppData/Roaming/Microsoft/Windows/Start%20Menu/Programs/Startup/Screencapper.bat";
                 File f = new File(new URI("file:///" + path));
-                
-                if(f.exists()){
+
+                if (f.exists()) {
                     f.delete();
                 }
-                
+
             } catch (Exception e) {
                 Settings.Log("Error removing from startup - ignoring");
             }
