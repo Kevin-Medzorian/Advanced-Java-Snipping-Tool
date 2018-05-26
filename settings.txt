@@ -1,5 +1,5 @@
 Tray on Start: false
 Keybind: SHIFT+ALT+4
-Exit on Close: true
-Start on Startup: true
-Sound: true
+Exit on Close: false
+Start on Startup: false
+Sound: false
